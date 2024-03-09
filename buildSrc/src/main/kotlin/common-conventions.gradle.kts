@@ -2,6 +2,7 @@ plugins {
     kotlin("jvm")
     id("jacoco")
     id("com.github.nbaztec.coveralls-jacoco")
+    id("org.jetbrains.dokka")
 }
 
 repositories {
@@ -15,6 +16,10 @@ version = validkVersion
 
 kotlin {
     jvmToolchain(17)
+}
+
+tasks.dokkaHtml {
+    outputDirectory.set(layout.buildDirectory.dir("../../docs/dokka/${project.name}"))
 }
 
 dependencies {
