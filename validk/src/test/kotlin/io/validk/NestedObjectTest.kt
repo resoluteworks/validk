@@ -59,10 +59,10 @@ class NestedObjectTest : StringSpec({
         val postCode: String,
     )
 
+    private data class Child(val childName: String)
+
     private data class Parent(
         val name: String,
         val children: List<Child>
     )
-
-    private data class Child(val childName: String)
 }

@@ -147,7 +147,7 @@ class Validation<T>(
         value: T,
         errors: MutableList<ValidationError>
     ) {
-        if (!constraint.test(value)) {
+        if (!constraint.check(value)) {
             val property = propertyPath ?: "Object"
             errors.add(ValidationError(property, constraint.errorMessage))
         }
