@@ -12,8 +12,11 @@ class Validation2Test : StringSpec({
         val validator = Validator<Parent> {
             if (value.name == "john") {
                 Parent::child {
-                    Child::age.notNull("the name cannot be null") {
+                    Child::age.notNull {
                         addConstraint("greater than zero") { it > 0 }
+                    }
+
+                    Child::age.ifNotNull {
                     }
 
                     Child::childName {
@@ -69,6 +72,12 @@ class ValidationContext<T>(
 
     fun <R> KProperty1<T, R?>.notNull(message: String = "${this.name} cannot be null", childBuilder: ValidationBuilder<R>) {
         addConstraint(message) { it != null }
+        if (this.get(value) != null) {
+            children.add(ChildValidationBuilder.Object(this, childBuilder as ValidationBuilder<*>))
+        }
+    }
+
+    fun <R> KProperty1<T, R?>.ifNotNull(childBuilder: ValidationBuilder<R>) {
         if (this.get(value) != null) {
             children.add(ChildValidationBuilder.Object(this, childBuilder as ValidationBuilder<*>))
         }
