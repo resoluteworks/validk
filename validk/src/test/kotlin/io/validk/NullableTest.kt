@@ -6,7 +6,9 @@ import io.kotest.matchers.shouldBe
 class NullableTest : StringSpec({
 
     "validate if not null" {
-        val validation = Validation(failFast = false) {
+        data class Person(val name: String, val email: String?)
+
+        val validation = Validation {
             Person::name { notBlank() }
             Person::email ifNotNull {
                 notBlank()
@@ -25,18 +27,22 @@ class NullableTest : StringSpec({
     }
 
     "cannot be null" {
-        val validation = Validation(failFast = false) {
+        data class Person(val name: String, val email: String?)
+
+        val validation = Validation {
             Person::name { notBlank() }
-            Person::email notNull {
+            Person::email.notNull("email cannot be null") {
                 email()
             }
         }
-        validation.validate(Person("John Smith", null)) shouldBe errors(ValidationError("email", "is required"))
+        validation.validate(Person("John Smith", null)) shouldBe errors(ValidationError("email", "email cannot be null"))
         validation.validate(Person("John Smith", "aaa")) shouldBe errors(ValidationError("email", "must be a valid email"))
     }
 
     "cannot be null custom message" {
-        val validation = Validation(failFast = false) {
+        data class Person(val name: String, val email: String?)
+
+        val validation = Validation {
             Person::name { notBlank() }
             Person::email.notNull("Please enter an email") {
                 email()
@@ -45,10 +51,4 @@ class NullableTest : StringSpec({
         validation.validate(Person("John Smith", null)) shouldBe errors(ValidationError("email", "Please enter an email"))
         validation.validate(Person("John Smith", "aaa")) shouldBe errors(ValidationError("email", "must be a valid email"))
     }
-}) {
-
-    private data class Person(
-        val name: String,
-        val email: String?
-    )
-}
+})

@@ -2,12 +2,12 @@ package io.validk
 
 data class ValidationError(
     val propertyPath: String,
-    val errorMessage: String
+    val message: String
 ) {
     internal fun indexed(property: String, index: Int): ValidationError {
         return ValidationError(
             propertyPath = this.propertyPath.indexedProperty(property, index),
-            errorMessage = errorMessage
+            message = message
         )
     }
 

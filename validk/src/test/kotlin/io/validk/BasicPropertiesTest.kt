@@ -6,14 +6,14 @@ import io.kotest.matchers.shouldBe
 class BasicPropertiesTest : StringSpec({
 
     "one field failed, one error" {
-        Validation(failFast = false) {
+        Validation {
             Person::name { notBlank() }
             Person::age { min(18) }
         }.validate(Person(name = "John Smith", age = 12)) shouldBe errors(ValidationError("age", "must be at least 18"))
     }
 
     "one field failed, one error - create validation object first" {
-        val validation = Validation<Person>(failFast = false) {
+        val validation = Validation {
             Person::name { notBlank() }
             Person::age { min(18) }
         }
@@ -21,7 +21,7 @@ class BasicPropertiesTest : StringSpec({
     }
 
     "one field failed, multiple errors" {
-        Validation(failFast = false) {
+        Validation {
             Person::name {
                 notBlank()
                 matches("[a-zA-Z]+ [a-zA-Z]+")
@@ -33,8 +33,8 @@ class BasicPropertiesTest : StringSpec({
         )
     }
 
-    "fail fast" {
-        Validation {
+    "eager" {
+        Validation(eager = true) {
             Person::name {
                 notBlank()
                 matches("[a-zA-Z]+ [a-zA-Z]+")
@@ -44,7 +44,7 @@ class BasicPropertiesTest : StringSpec({
             ValidationError("name", "cannot be blank")
         )
 
-        Validation {
+        Validation(eager = true) {
             Person::name {
                 notBlank()
                 matches("[a-zA-Z]+ [a-zA-Z]+")
@@ -56,7 +56,7 @@ class BasicPropertiesTest : StringSpec({
             ValidationError("name", "must match pattern [a-zA-Z]+ [a-zA-Z]+")
         )
 
-        Validation {
+        Validation(eager = true) {
             Person::name {
                 matches("[a-zA-Z]+ [a-zA-Z]+")
                 notBlank()
@@ -68,7 +68,7 @@ class BasicPropertiesTest : StringSpec({
     }
 
     "one field failed, multiple errors, first error only" {
-        Validation(failFast = false) {
+        Validation {
             Person::name {
                 notBlank()
                 matches("[a-zA-Z]+ [a-zA-Z]+")
@@ -78,7 +78,7 @@ class BasicPropertiesTest : StringSpec({
     }
 
     "custom error message" {
-        Validation(failFast = false) {
+        Validation {
             Person::name {
                 notBlank() message "Really now?"
                 matches("[a-zA-Z]+ [a-zA-Z]+") message "Characters only please"
