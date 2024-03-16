@@ -2,11 +2,13 @@ package io.validk
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
+import org.junit.platform.commons.util.Preconditions.notBlank
+import org.junit.platform.commons.util.Preconditions.notEmpty
 
 class ConditionalValidation : StringSpec({
 
     "validate fields based on the value of another field" {
-        val validation = Validation<Entity> {
+        val validation = validator {
             Entity::entityType { enum<EntityType>() }
 
             withValue { entity ->

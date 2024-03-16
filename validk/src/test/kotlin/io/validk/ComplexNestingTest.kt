@@ -6,21 +6,25 @@ import io.kotest.matchers.shouldBe
 class ComplexNestingTest : StringSpec({
 
     "complex validation" {
-        val validation = Validation<Organisation> {
+        val validation = validator {
             Organisation::name { notBlank() }
-            Organisation::employees each {
-                Employee::name { notBlank() }
-                Employee::email { email() }
-                Employee::phoneNumber ifNotNull { minLength(6) }
-                Employee::roles each {
-                    Role::name { enum("DIRECTOR", "EMPLOYEE") }
-                    Role::types {
-                        notEmpty()
+            Organisation::employees{
+                each {
+                    Employee::name { notBlank() }
+                    Employee::email { email() }
+                    Employee::phoneNumber ifNotNull { minLength(6) }
+                    Employee::roles {
+                        each {
+                            Role::name { enum("DIRECTOR", "EMPLOYEE") }
+                            Role::types {
+                                notEmpty()
+                            }
+                        }
                     }
-                }
-                Employee::address {
-                    Address::city { notBlank() }
-                    Address::postCode { minLength(5) }
+                    Employee::address {
+                        Address::city { notBlank() }
+                        Address::postCode { minLength(5) }
+                    }
                 }
             }
         }

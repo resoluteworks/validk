@@ -52,10 +52,6 @@ fun Validation<out Collection<*>>.notEmpty() = addConstraint("cannot be empty") 
     it.isNotEmpty()
 }
 
-fun Validation<out Map<*, *>>.notEmpty() = addConstraint("cannot be empty") {
-    it.isNotEmpty()
-}
-
 fun Validation<out Map<*, *>>.containsKey(key: String) = addConstraint("cannot be empty") {
     it.isNotEmpty()
 }

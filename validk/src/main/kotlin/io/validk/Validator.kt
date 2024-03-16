@@ -17,7 +17,11 @@ infix fun <T, C : Collection<T>> Validation<C>.each(childBuilder: ValidationBuil
     children.add(ChildValidationBuilder.Collection(childBuilder))
 }
 
-class Validation<T>(private val propertyPath: String, val value: T) {
+class Validation<T>(
+    private val propertyPath: String,
+    val value: T,
+    private val eager: Boolean
+) {
 
     private val constraints = mutableListOf<Constraint<T>>()
     internal val children = mutableListOf<ChildValidationBuilder<T, *>>()
@@ -39,7 +43,7 @@ class Validation<T>(private val propertyPath: String, val value: T) {
         }
     }
 
-    fun <R> KProperty1<T, R?>.ifNotNull(childBuilder: ValidationBuilder<R>) {
+    infix fun <R> KProperty1<T, R?>.ifNotNull(childBuilder: ValidationBuilder<R>) {
         if (this.get(value) != null) {
             children.add(ChildValidationBuilder.Object(this, childBuilder as ValidationBuilder<*>))
         }
@@ -58,14 +62,14 @@ class Validation<T>(private val propertyPath: String, val value: T) {
                         val childValue = child.property.get(value)
                         // Technically this should never happen
                             ?: throw IllegalStateException("Child property ${child.property.name} is null but a null-check hasn't been configured")
-                        val childContext = Validation(propertyPath.addProperty(child.property.name), childValue)
+                        val childContext = Validation(propertyPath.addProperty(child.property.name), childValue, eager)
                         (child.builder as ValidationBuilder<Any>)(childContext)
                         errors.addAll(childContext.validate())
                     }
 
                     is ChildValidationBuilder.Collection -> {
                         (value as Collection<Any>).forEachIndexed { index, element ->
-                            val childContext: Validation<Any> = Validation(propertyPath + "[${index}]", element)
+                            val childContext: Validation<Any> = Validation(propertyPath + "[${index}]", element, eager)
                             (child.builder as ValidationBuilder<Any>)(childContext)
                             errors.addAll(childContext.validate())
                         }
@@ -82,9 +86,9 @@ fun interface Validator<T> {
     fun validate(value: T): ValidationErrors?
 }
 
-fun <T> validator(buildValidation: ValidationBuilder<T>): Validator<T> {
+fun <T> validator(eager: Boolean = false, buildValidation: ValidationBuilder<T>): Validator<T> {
     return Validator { value ->
-        val context = Validation<T>("", value)
+        val context = Validation("", value, eager)
         buildValidation(context)
         val errors = context.validate()
         if (errors.isEmpty()) {
