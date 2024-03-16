@@ -52,6 +52,14 @@ fun Validation<out Collection<*>>.notEmpty() = addConstraint("cannot be empty") 
     it.isNotEmpty()
 }
 
+fun Validation<out Map<*, *>>.notEmpty() = addConstraint("cannot be empty") {
+    it.isNotEmpty()
+}
+
+fun Validation<out Map<*, *>>.containsKey(key: String) = addConstraint("cannot be empty") {
+    it.isNotEmpty()
+}
+
 fun Validation<out Collection<*>>.minSize(minSize: Int) = addConstraint("should have at least ${minSize} elements") {
     it.size >= minSize
 }

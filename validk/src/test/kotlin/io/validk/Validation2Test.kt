@@ -7,7 +7,7 @@ class Validation2Test : StringSpec({
 
     "test" {
         data class Child(val childName: String, val names: List<String>, val age: Int? = null)
-        data class Parent(val name: String, val child: Child)
+        data class Parent(val name: String, val child: Child, val attributes: Map<String, Any>)
 
         val validator = Validator<Parent> {
             if (value.name == "john") {
@@ -27,18 +27,18 @@ class Validation2Test : StringSpec({
                         }
                     }
                 }
+
+                Parent::attributes {
+                    addConstraint("empty") { !it.isEmpty() }
+                }
             }
         }
-        val errors = validator.validate(Parent("john", Child("", listOf("aaa", "bbb", "c*"))))
+        val value = Parent("john", Child("", listOf("aaa", "bbb", "c*")), emptyMap())
+        val errors = validator.validate(value)
 
         println(errors)
     }
 })
-
-infix fun <T, C : Collection<T>> ValidationContext<C>.each(childBuilder: ValidationBuilder<T>) {
-    children.add(ChildValidationBuilder.Collection(childBuilder))
-}
-
 
 sealed class ChildValidationBuilder<Parent, Child> {
 
@@ -86,7 +86,7 @@ class ValidationContext<T>(
                     is ChildValidationBuilder.Object -> {
                         val childValue = child.property.get(value)
                         // Technically this should never happen
-                            ?: throw IllegalStateException("Child property ${child.property.name} is null but it null-check hasn't been configured")
+                            ?: throw IllegalStateException("Child property ${child.property.name} is null but a null-check hasn't been configured")
                         val childContext = ValidationContext(propertyPath.addProperty(child.property.name), childValue)
                         (child.builder as ValidationBuilder<Any>)(childContext)
                         errors.addAll(childContext.validate())
@@ -105,6 +105,10 @@ class ValidationContext<T>(
 
         return errors
     }
+}
+
+infix fun <T, C : Collection<T>> ValidationContext<C>.each(childBuilder: ValidationBuilder<T>) {
+    children.add(ChildValidationBuilder.Collection(childBuilder))
 }
 
 class Validator<T>(private val buildValidation: ValidationBuilder<T>) {
