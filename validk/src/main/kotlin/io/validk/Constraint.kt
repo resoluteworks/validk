@@ -5,6 +5,11 @@ class Constraint<T>(
     val check: (T) -> Boolean
 ) {
 
+    infix fun message(errorMessage: String): Constraint<T> {
+        this.errorMessage = errorMessage
+        return this
+    }
+
     internal fun check(propertyPath: String, value: T): ValidationError? {
         return if (!check(value)) {
             ValidationError(propertyPath, errorMessage)
