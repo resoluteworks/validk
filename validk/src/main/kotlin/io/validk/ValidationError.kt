@@ -4,6 +4,7 @@ data class ValidationError(
     val propertyPath: String,
     val message: String
 ) {
+
     internal fun indexed(property: String, index: Int): ValidationError {
         return ValidationError(
             propertyPath = this.propertyPath.indexedProperty(property, index),

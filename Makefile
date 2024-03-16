@@ -7,7 +7,7 @@ include gradle.properties
 
 env:
 	rm -f .env
-	op read "op://Development/Resolute Works - Open Source/validk.env.local" > .env
+	op read "op://Development/resolute-works-open-source/validk.env.local" > .env
 
 test:
 	./gradlew clean test

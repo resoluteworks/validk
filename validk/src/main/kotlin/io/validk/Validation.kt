@@ -11,7 +11,7 @@ class Validation<T>(
     private val nullMessage: String = "is required"
 ) {
     private val constraints = mutableListOf<Constraint<T>>()
-    private val childValidations = mutableMapOf<KProperty1<T, Any?>, Validation<Any>>()
+    private val childValidations = mutableMapOf<KProperty1<T, Any?>, MutableList<Validation<Any>>>()
     private val dynamicValidations = mutableListOf<DynamicValidation<T>>()
 
     fun addConstraint(errorMessage: String, test: (T) -> Boolean): Constraint<T> {
@@ -75,7 +75,8 @@ class Validation<T>(
     ): Validation<E> {
         val validation = Validation<E>(propertyPath.addProperty(property.name), checksCollectionElements, failFast, nullMessage)
         init(validation)
-        childValidations[property] = validation as Validation<Any>
+        childValidations.putIfAbsent(property, mutableListOf())
+        childValidations[property]!!.add(validation as Validation<Any>)
         return validation
     }
 
@@ -113,14 +114,16 @@ class Validation<T>(
             dynamicValidation.validate(value)?.let { errors.addAll(it.errors) }
         }
 
-        childValidations.forEach { (property, validation) ->
+        childValidations.forEach { (property, validations) ->
             val propertyValue = property.get(value)
-            if (validation.validatesCollectionElements) {
-                (propertyValue as Collection<*>).forEachIndexed { index, element ->
-                    validation.validate(element!!)?.let { errors.addAll(it.errors.map { it.indexed(property.name, index) }) }
+            validations.forEach { validation ->
+                if (validation.validatesCollectionElements) {
+                    (propertyValue as Collection<*>).forEachIndexed { index, element ->
+                        validation.validate(element!!)?.let { errors.addAll(it.errors.map { it.indexed(property.name, index) }) }
+                    }
+                } else {
+                    validation.validate(propertyValue)?.let { errors.addAll(it.errors) }
                 }
-            } else {
-                validation.validate(propertyValue)?.let { errors.addAll(it.errors) }
             }
         }
 

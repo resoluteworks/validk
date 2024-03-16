@@ -18,4 +18,24 @@ class CollectionTest : StringSpec({
         Validation<List<String>> { maxSize(2) }.validate(listOf("AA", "BB")) shouldBe null
         Validation<List<String>> { maxSize(2) }.validate(listOf("AA", "BB", "C")) shouldNotBe null
     }
+
+    "nested collection" {
+        data class Child(val childName: String)
+        data class Parent(val name: String, val children: List<Child>)
+
+        val validation = Validation<Parent> {
+            Parent::name { notBlank() }
+            Parent::children { notEmpty() message "children list cannot be empty" }
+            Parent::children each {
+                Child::childName { notBlank() }
+            }
+        }
+
+        validation.validate(Parent("John Smith", emptyList())) shouldBe errors(ValidationError("children", "children list cannot be empty"))
+        validation.validate(Parent("John Smith", listOf(Child("One"), Child("Two")))) shouldBe null
+        validation.validate(Parent("John Smith", listOf(Child(""), Child("Two"), Child("")))) shouldBe errors(
+            ValidationError("children[0].childName", "cannot be blank"),
+            ValidationError("children[2].childName", "cannot be blank")
+        )
+    }
 })

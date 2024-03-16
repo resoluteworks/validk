@@ -17,13 +17,14 @@ class Examples : StringSpec({
         }
 
         val org = Organisation(
-            "A", listOf(
-                Employee("John", "john@test.com"),
-                Employee("Hannah Johnson", "hanna")
-            )
+            name = "ACME",
+            employees = listOf(Employee("John", "john@test.com"), Employee("Hannah Johnson", "hanna"))
         )
         val errors = validation.validate(org)
-        errors?.errors?.forEach { println(it) }
+        errors!!.errors?.forEach { println(it) }
+
+        println(errors.eagerErrors)
+        println(errors.eagerErrorMessages)
     }
 
     "valid object" {
@@ -34,7 +35,8 @@ class Examples : StringSpec({
             }
         }
 
-        Person("John Smith", "john@test.com").validate()
+        val person = Person("John Smith", "john@test.com")
+        val errors = person.validate()
     }
 
     "custom messages" {

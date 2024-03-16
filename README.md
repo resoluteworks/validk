@@ -18,7 +18,7 @@ implementation "io.resoluteworks:validk:${validkVersion}"
 data class Employee(val name: String, val email: String?)
 data class Organisation(val name: String, val employees: List<Employee>)
 
-val validation = Validation(failFast = false) {
+val validation = Validation {
     Organisation::name { minLength(5) }
     Organisation::employees each {
         Employee::name { minLength(10) }
@@ -27,10 +27,8 @@ val validation = Validation(failFast = false) {
 }
 
 val org = Organisation(
-    "A", listOf(
-        Employee("John", "john@test.com"),
-        Employee("Hannah Johnson", "hanna")
-    )
+    name = "ACME",
+    employees = listOf(Employee("John", "john@test.com"), Employee("Hannah Johnson", "hanna"))
 )
 val errors = validation.validate(org)
 errors?.errors?.forEach { println(it) }
@@ -38,9 +36,9 @@ errors?.errors?.forEach { println(it) }
 
 This would print
 ```text
-ValidationError(propertyPath=name, errorMessage=must be at least 5 characters)
-ValidationError(propertyPath=employees[0].name, errorMessage=must be at least 10 characters)
-ValidationError(propertyPath=employees[1].email, errorMessage=must be a valid email)
+ValidationError(propertyPath=name, message=must be at least 5 characters)
+ValidationError(propertyPath=employees[0].name, message=must be at least 10 characters)
+ValidationError(propertyPath=employees[1].email, message=must be a valid email)
 ```
 
 Validating an object returns a `ValidationErrors` which is `null` when validation succeeds.
@@ -85,11 +83,43 @@ val validation: Validation<Entity> = Validation {
 }
 ```
 
+## Eager validation and errors
+It's often only required to return the first failure (failed constraint) message when validating a field.
+This is usually the case when displaying user errors in an application and when the order of the constraints
+implies the next one would fail.
+
+For example `notBlank()` failing means that `email()` will fail, and we want to respond with "Email is required"
+rather than ["Email is required", "This is not a valid email"].
+
+There are two ways to achieve this. The first option is to use eager validation by passing `eager=true` to the Validation constructor.
+This will prevent further validation checks running once a first error was encountered
+```kotlin
+Validation(eager = true) {
+    Person::name {
+        notBlank()
+        matches("[a-zA-Z]+ [a-zA-Z]+")
+    }
+}
+```
+
+The second option is to allow validations to run, which is the default behaviour (`eager` defaults to `false`) which will return
+all failures for all constraints that have been configured. The errors can then be collected "eagerly" from the `ValidationErrors` object. 
+```kotlin
+val errors = validation.validate(org)
+
+// returns eager ValidationErrors objects
+println(errors.eagerErrors)
+
+// returns only the error messages as a Map<String,String> (property path to error message)
+println(errors.eagerErrorMessages)
+```
+For more details on `ValidationErrors` object please check the [ValiationErrors docs](https://resoluteworks.github.io/validk/validk/validk/io.validk/-validation-errors/index.html)
+
 ## ValidObject
 `ValidObject` provides a basic mechanism for storing the validation logic within the object itself.
 ```kotlin
 data class MyObject(val name: String, val age: Int) : ValidObject<MyObject> {
-    override val validation: Validation<MyObject> = Validation {
+    override val validation = Validation {
         MyObject::name { notBlank() }
         MyObject::age { min(18) }
     }
@@ -107,9 +137,3 @@ Validation<Person> {
     }
 }
 ```
-
-## Eager errors
-It's often only required to return the first failure (failed constraint) message when validating a field. This is usually the case when displaying user errors in an application and when the order of the constraints implies the next one would fail: `notBlank()` failing implies `email()` will fail, but we first want to respond with "Email is required" rather than ["Email is required", "This is not a valid email"].
-
-For this purpose `ValidationErrors` provides `eager*` versions of its properties, including `eagerErrors` and `eagerErrorMessages`. For a full list of properties please check the
-[ValiationErrors docs](https://resoluteworks.github.io/validk/validk/validk/io.validk/-validation-errors/index.html)
