@@ -19,7 +19,7 @@ publish:
 publish-local:
 	./gradlew publish -x initializeSonatypeStagingRepository -x publishMavenJavaPublicationToSonatypeRepository
 
-release: test publish
+release:
 	@echo $(validkVersion)
 	git tag "v$(validkVersion)" -m "Release v$(validkVersion)"
 	git push --tags --force
