@@ -21,10 +21,26 @@ class Examples : StringSpec({
             employees = listOf(Employee("John", "john@test.com"), Employee("Hannah Johnson", "hanna"))
         )
         val errors = validation.validate(org)
-        errors!!.errors?.forEach { println(it) }
+        errors?.validationErrors?.forEach { println(it) }
 
-        println(errors.eagerErrors)
-        println(errors.eagerErrorMessages)
+
+        errors!!
+        // Checking validation errors
+
+        // A list of ValidationError objects
+        errors.validationErrors
+
+        // All validation errors for property path employees[0].name (List<String>)
+        errors.errors("employees[0].name")
+
+        // The first error for property path employees[0].name (String)
+        errors.error("employees[0].name")
+
+        // Check whether a property path has any validation errors (Boolean)
+        errors.hasErrors("employees[0].name")
+
+        // List of all property paths that have validation errors (Set<String>)
+        errors.failedProperties
     }
 
     "valid object" {

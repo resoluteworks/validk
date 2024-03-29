@@ -13,13 +13,13 @@ test:
 	./gradlew clean test
 	./gradlew coverallsJacoco
 
-publish: test
-	./gradlew publish -PpublishToMavenCentral=true
+publish:
+	./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository
 
-publish-local: test
-	./gradlew publish -PpublishToMavenCentral=false
+publish-local:
+	./gradlew publish -x initializeSonatypeStagingRepository -x publishMavenJavaPublicationToSonatypeRepository
 
-release: publish
+release: test publish
 	@echo $(validkVersion)
 	git tag "v$(validkVersion)" -m "Release v$(validkVersion)"
 	git push --tags --force

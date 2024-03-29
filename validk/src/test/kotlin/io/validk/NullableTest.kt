@@ -9,6 +9,7 @@ class NullableTest : StringSpec({
         data class Person(val name: String, val email: String?)
 
         val validation = Validation {
+            failFast(false)
             Person::name { notBlank() }
             Person::email ifNotNull {
                 notBlank()

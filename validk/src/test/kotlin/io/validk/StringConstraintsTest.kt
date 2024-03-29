@@ -48,8 +48,8 @@ class StringConstraintsTest : StringSpec({
         Validation { email() }.validate("test@domain.com") shouldBe null
 
         Validation { email() }.validate("") shouldNotBe null
-        Validation { email() }.validate("")!!.eagerErrors shouldBe listOf(ValidationError("", "must be a valid email"))
-        Validation { email() }.validate("test")!!.eagerErrors shouldBe listOf(ValidationError("", "must be a valid email"))
+        Validation { email() }.validate("")!!.validationErrors shouldBe listOf(ValidationError("", "must be a valid email"))
+        Validation { email() }.validate("test")!!.validationErrors shouldBe listOf(ValidationError("", "must be a valid email"))
     }
 
     "enum" {

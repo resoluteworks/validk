@@ -1,39 +1,38 @@
 package io.validk
 
-data class ValidationErrors(val errors: List<ValidationError>) {
+data class ValidationErrors(val validationErrors: List<ValidationError>) {
 
     constructor(propertyPath: String, errorMessage: String) : this(listOf(ValidationError(propertyPath, errorMessage)))
 
     /**
      * Error messages grouped by property path
      */
-    val errorMessages: Map<String, List<String>> =
-        errors.groupBy { it.propertyPath }
+    val errors: Map<String, List<String>> =
+        validationErrors.groupBy { it.propertyPath }
             .map { it.key to it.value.map { error -> error.message } }
             .toMap()
 
     /**
-     * Eager ValidationErrors, one for each property path
+     * Returns all error messages for the provided [propertyPath] or empty list if there are no errors for it.
      */
-    val eagerErrors: List<ValidationError> = errors.eagerErrors()
+    fun errors(propertyPath: String): List<String> {
+        return errors[propertyPath] ?: emptyList()
+    }
 
     /**
-     * Eager error messages keyed by property path
+     * Returns all the first error message for the provided [propertyPath] or null if there are no errors for it.
      */
-    val eagerErrorMessages: Map<String, String> = eagerErrors.associate { it.propertyPath to it.message }
+    fun error(propertyPath: String): String? {
+        return errors[propertyPath]?.firstOrNull()
+    }
 
     /**
      * Set of property paths containing errors
      */
-    val failedProperties: Set<String> = errors.map { it.propertyPath }.toSet()
+    val failedProperties: Set<String> = validationErrors.map { it.propertyPath }.toSet()
 
     /**
      * Checks if there are validation errors for a property path
      */
-    fun failed(propertyPath: String): Boolean = failedProperties.contains(propertyPath)
-}
-
-private fun List<ValidationError>.eagerErrors(): List<ValidationError> {
-    return this.groupBy { it.propertyPath }
-        .map { it.value.first() }
+    fun hasErrors(propertyPath: String): Boolean = failedProperties.contains(propertyPath)
 }

@@ -7,12 +7,16 @@ internal typealias DynamicValidation<T> = Validation<T>.(T) -> Unit
 class Validation<T>(
     private val propertyPath: String,
     private val validatesCollectionElements: Boolean = false,
-    private val failFast: Boolean = true,
+    private var failFast: Boolean = true,
     private val nullMessage: String = "is required"
 ) {
     private val constraints = mutableListOf<Constraint<T>>()
     private val childValidations = mutableMapOf<KProperty1<T, Any?>, MutableList<Validation<Any>>>()
     private val dynamicValidations = mutableListOf<DynamicValidation<T>>()
+
+    fun failFast(failFast: Boolean = true) {
+        this.failFast = failFast
+    }
 
     fun addConstraint(errorMessage: String, test: (T) -> Boolean): Constraint<T> {
         val constraint = Constraint(errorMessage, test)
@@ -111,7 +115,7 @@ class Validation<T>(
             dynamicValidations.forEach { valueValidation ->
                 valueValidation(dynamicValidation, value)
             }
-            dynamicValidation.validate(value)?.let { errors.addAll(it.errors) }
+            dynamicValidation.validate(value)?.let { errors.addAll(it.validationErrors) }
         }
 
         childValidations.forEach { (property, validations) ->
@@ -119,10 +123,10 @@ class Validation<T>(
             validations.forEach { validation ->
                 if (validation.validatesCollectionElements) {
                     (propertyValue as Collection<*>).forEachIndexed { index, element ->
-                        validation.validate(element!!)?.let { errors.addAll(it.errors.map { it.indexed(property.name, index) }) }
+                        validation.validate(element!!)?.let { errors.addAll(it.validationErrors.map { it.indexed(property.name, index) }) }
                     }
                 } else {
-                    validation.validate(propertyValue)?.let { errors.addAll(it.errors) }
+                    validation.validate(propertyValue)?.let { errors.addAll(it.validationErrors) }
                 }
             }
         }
@@ -135,8 +139,8 @@ class Validation<T>(
     }
 
     companion object {
-        operator fun <T> invoke(eager: Boolean = false, init: Validation<T>.() -> Unit): Validation<T> {
-            val validation = Validation<T>(propertyPath = "", failFast = eager)
+        operator fun <T> invoke(init: Validation<T>.() -> Unit): Validation<T> {
+            val validation = Validation<T>(propertyPath = "")
             return validation.apply(init)
         }
     }

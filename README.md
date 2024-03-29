@@ -3,7 +3,7 @@
 ![Coveralls](https://img.shields.io/coverallsCoverage/github/resoluteworks/validk)
 
 Validk is a validation framework for Kotlin (JVM), largely inspired by [Konform](https://github.com/konform-kt/konform). Among other things,
-the design aims to solve some specialised use cases like context-aware and conditional validation.
+the design aims to solve use cases like context-aware and conditional validations.
 
 The framework provides a typesafe DSL and has zero dependencies.
 
@@ -42,9 +42,37 @@ ValidationError(propertyPath=employees[1].email, message=must be a valid email)
 ```
 
 Validating an object returns a `ValidationErrors` which is `null` when validation succeeds.
-In other words, validation is successful when the response is `null`, or an instance of `ValidationErrors` when it fails.   
+In other words, validation is successful when the response is `null`, and an instance of `ValidationErrors` when it fails.   
+
+The object `ValidationErrors` contains a set of utilities to navigate the error messages for the failed properties.
+```kotlin
+// A list of ValidationError objects
+errors.validationErrors
+
+// All validation errors for property path employees[0].name (List<String>)
+errors.errors("employees[0].name")
+
+// The first error for property path employees[0].name (String)
+errors.error("employees[0].name")
+
+// Check whether a property path has any validation errors (Boolean)
+errors.hasErrors("employees[0].name")
+
+// List of all property paths that have validation errors (Set<String>)
+errors.failedProperties
+```
 
 Please check the [tests](https://github.com/resoluteworks/validk/tree/main/validk/src/test/kotlin/io/validk) for more examples and the [documentation](https://resoluteworks.github.io/validk/validk/validk/io.validk/index.html) for a full list of constraints.
+
+## Custom messages
+```kotlin
+Validation<Person> {
+    Person::name {
+        notBlank() message "A person needs a name"
+        matches("[a-zA-Z\\s]+") message "Letters only please"
+    }
+}
+```
 
 ## Context-aware and conditional validation
 Validk provides the ability to access the object being validated using the `withValue` construct.
@@ -83,18 +111,19 @@ val validation: Validation<Entity> = Validation {
 }
 ```
 
-## Eager validation and errors
-It's often only required to return the first failure (failed constraint) message when validating a field.
+## Fail-fast validation
+It's often required to only return the first failure (failed constraint) message when validating a field.
 This is usually the case when displaying user errors in an application and when the order of the constraints
 implies the next one would fail.
 
 For example `notBlank()` failing means that `email()` will fail, and we want to respond with "Email is required"
 rather than ["Email is required", "This is not a valid email"].
 
-There are two ways to achieve this. The first option is to use eager validation by passing `eager=true` to the Validation constructor.
-This will prevent further validation checks running once a first error was encountered
+We call this fail-fast validation and it's enabled by default. Fail-fast validation can be configured when creating
+the `Validation` object. The example below will check all the constraints and return errors for each one that fails.
 ```kotlin
-Validation(eager = true) {
+Validation {
+    failFast(false)
     Person::name {
         notBlank()
         matches("[a-zA-Z]+ [a-zA-Z]+")
@@ -102,18 +131,8 @@ Validation(eager = true) {
 }
 ```
 
-The second option is to allow validations to run, which is the default behaviour (`eager` defaults to `false`) which will return
-all failures for all constraints that have been configured. The errors can then be collected "eagerly" from the `ValidationErrors` object. 
-```kotlin
-val errors = validation.validate(org)
-
-// returns eager ValidationErrors objects
-println(errors.eagerErrors)
-
-// returns only the error messages as a Map<String,String> (property path to error message)
-println(errors.eagerErrorMessages)
-```
-For more details on `ValidationErrors` object please check the [ValiationErrors docs](https://resoluteworks.github.io/validk/validk/validk/io.validk/-validation-errors/index.html)
+When turning fail-fast off, you can still opt to only select the first error message post-validation, by using `ValidationErrors.error(propertyPath)`.
+For more details on `ValidationErrors` please check the [ValiationErrors docs](https://resoluteworks.github.io/validk/validk/validk/io.validk/-validation-errors/index.html)
 
 ## ValidObject
 `ValidObject` provides a basic mechanism for storing the validation logic within the object itself.
@@ -126,14 +145,4 @@ data class MyObject(val name: String, val age: Int) : ValidObject<MyObject> {
 }
 
 val result = MyObject("John Smith", 12).validate()
-```
-
-## Custom messages
-```kotlin
-Validation<Person> {
-    Person::name {
-        notBlank() message "A person needs a name"
-        matches("[a-zA-Z\\s]+") message "Letters only please"
-    }
-}
 ```
