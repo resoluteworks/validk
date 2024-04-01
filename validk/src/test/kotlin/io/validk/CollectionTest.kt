@@ -31,9 +31,9 @@ class CollectionTest : StringSpec({
             }
         }
 
-        validation.validate(Parent("John Smith", emptyList())) shouldBe errors(ValidationError("children", "children list cannot be empty"))
+        validation.validate(Parent("John Smith", emptyList())) shouldBe ValidationErrors(ValidationError("children", "children list cannot be empty"))
         validation.validate(Parent("John Smith", listOf(Child("One"), Child("Two")))) shouldBe null
-        validation.validate(Parent("John Smith", listOf(Child(""), Child("Two"), Child("")))) shouldBe errors(
+        validation.validate(Parent("John Smith", listOf(Child(""), Child("Two"), Child("")))) shouldBe ValidationErrors(
             ValidationError("children[0].childName", "cannot be blank"),
             ValidationError("children[2].childName", "cannot be blank")
         )

@@ -17,18 +17,18 @@ class NestedObjectTest : StringSpec({
             }
         }
 
-        validation.validate(Person("", Address("London", "ABCD"))) shouldBe errors(ValidationError("name", "cannot be blank"))
-        validation.validate(Person("", Address("", "ABCD"))) shouldBe errors(
+        validation.validate(Person("", Address("London", "ABCD"))) shouldBe ValidationErrors(ValidationError("name", "cannot be blank"))
+        validation.validate(Person("", Address("", "ABCD"))) shouldBe ValidationErrors(
             ValidationError("name", "cannot be blank"),
             ValidationError("address.city", "cannot be blank")
         )
-        validation.validate(Person("", Address("", "ABC"))) shouldBe errors(
+        validation.validate(Person("", Address("", "ABC"))) shouldBe ValidationErrors(
             ValidationError("name", "cannot be blank"),
             ValidationError("address.city", "cannot be blank"),
             ValidationError("address.postCode", "must be at least 4 characters")
         )
 
-        validation.validate(Person("John Smith", Address("", "ABC"))) shouldBe errors(
+        validation.validate(Person("John Smith", Address("", "ABC"))) shouldBe ValidationErrors(
             ValidationError("address.city", "cannot be blank"),
             ValidationError("address.postCode", "must be at least 4 characters")
         )

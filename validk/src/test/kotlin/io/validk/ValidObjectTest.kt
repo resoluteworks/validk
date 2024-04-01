@@ -6,7 +6,7 @@ import io.kotest.matchers.shouldBe
 class ValidObjectTest : StringSpec({
 
     "valid object validation" {
-        TestValidObject("", 12).validate() shouldBe errors(
+        TestValidObject("", 12).validate() shouldBe ValidationErrors(
             ValidationError("name", "cannot be blank"),
             ValidationError("age", "must be at least 18")
         )
@@ -14,17 +14,22 @@ class ValidObjectTest : StringSpec({
     }
 
     "validation check" {
-        data class Result(val success: Boolean)
+        data class Result(val success: Boolean, val input: TestValidObject, val errors: ValidationErrors?)
 
         TestValidObject("", 12).validate {
-            onError { Result(false) }
-            onSuccess { Result(true) }
-        } shouldBe Result(false)
+            error { Result(false, this, it) }
+            success { Result(true, this, null) }
+        } shouldBe Result(
+            false, TestValidObject("", 12), ValidationErrors(
+                ValidationError("name", "cannot be blank"),
+                ValidationError("age", "must be at least 18")
+            )
+        )
 
         TestValidObject("John smith", 20).validate {
-            onError { Result(false) }
-            onSuccess { Result(true) }
-        } shouldBe Result(true)
+            this.error { Result(false, this, it) }
+            success { Result(true, this, null) }
+        } shouldBe Result(true, TestValidObject("John smith", 20), null)
     }
 }) {
 

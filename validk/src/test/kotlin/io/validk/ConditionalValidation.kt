@@ -21,17 +21,17 @@ class ConditionalValidation : StringSpec({
             }
         }
 
-        validation.validate(Entity("PERSON", "", "Passport number 0123456789", 12)) shouldBe errors(
+        validation.validate(Entity("PERSON", "", "Passport number 0123456789", 12)) shouldBe ValidationErrors(
             ValidationError("age", "must be at least 18")
         )
-        validation.validate(Entity("COMPANY", "", "", 12)) shouldBe errors(
+        validation.validate(Entity("COMPANY", "", "", 12)) shouldBe ValidationErrors(
             ValidationError("registeredOffice", "must be at least 5 characters")
         )
 
         validation.validate(Entity("PERSON", "", "Passport number 0123456789", 24)) shouldBe null
         validation.validate(Entity("COMPANY", "London", "", 1)) shouldBe null
 
-        validation.validate(Entity("NOTHING", "London", "", 1)) shouldBe errors(
+        validation.validate(Entity("NOTHING", "London", "", 1)) shouldBe ValidationErrors(
             ValidationError("entityType", "must be one of: COMPANY, PERSON")
         )
     }
@@ -50,17 +50,17 @@ class ConditionalValidation : StringSpec({
             }
         }
 
-        validation.validate(Entity("PERSON", "", "Passport number 0123456789", 12)) shouldBe errors(
+        validation.validate(Entity("PERSON", "", "Passport number 0123456789", 12)) shouldBe ValidationErrors(
             ValidationError("age", "must be at least 18")
         )
-        validation.validate(Entity("COMPANY", "", "", 12)) shouldBe errors(
+        validation.validate(Entity("COMPANY", "", "", 12)) shouldBe ValidationErrors(
             ValidationError("registeredOffice", "must be at least 5 characters")
         )
 
         validation.validate(Entity("PERSON", "", "Passport number 0123456789", 24)) shouldBe null
         validation.validate(Entity("COMPANY", "London", "", 1)) shouldBe null
 
-        validation.validate(Entity("NOTHING", "London", "", 1)) shouldBe errors(
+        validation.validate(Entity("NOTHING", "London", "", 1)) shouldBe ValidationErrors(
             ValidationError("entityType", "must be one of: COMPANY, PERSON")
         )
     }
@@ -74,7 +74,7 @@ class ConditionalValidation : StringSpec({
         }
 
         validation.validate(EntityWithCollectionField(setOf("USER", "HR"), "")) shouldBe null
-        validation.validate(EntityWithCollectionField(setOf("USER", "ADMIN"), "")) shouldBe errors(
+        validation.validate(EntityWithCollectionField(setOf("USER", "ADMIN"), "")) shouldBe ValidationErrors(
             ValidationError("adminEmail", "Email admin is required when roles contains ADMIN")
         )
     }
@@ -89,11 +89,11 @@ class ConditionalValidation : StringSpec({
             }
         }
 
-        validation.validate(EntityWithCollectionField(emptySet(), "")) shouldBe errors(
+        validation.validate(EntityWithCollectionField(emptySet(), "")) shouldBe ValidationErrors(
             ValidationError("roles", "Roles required")
         )
         validation.validate(EntityWithCollectionField(setOf("USER", "HR"), "")) shouldBe null
-        validation.validate(EntityWithCollectionField(setOf("USER", "ADMIN"), "")) shouldBe errors(
+        validation.validate(EntityWithCollectionField(setOf("USER", "ADMIN"), "")) shouldBe ValidationErrors(
             ValidationError("adminEmail", "Email admin is required when roles contains ADMIN")
         )
     }

@@ -4,6 +4,8 @@ data class ValidationErrors(val validationErrors: List<ValidationError>) {
 
     constructor(propertyPath: String, errorMessage: String) : this(listOf(ValidationError(propertyPath, errorMessage)))
 
+    constructor(vararg errors: ValidationError) : this(errors.toList())
+
     /**
      * Error messages grouped by property path
      */

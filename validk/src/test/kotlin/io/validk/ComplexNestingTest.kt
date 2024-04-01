@@ -45,7 +45,7 @@ class ComplexNestingTest : StringSpec({
                     )
                 )
             )
-        ) shouldBe errors(
+        ) shouldBe ValidationErrors(
             ValidationError("employees[1].roles[0].types", "cannot be empty"),
             ValidationError("employees[1].address.postCode", "must be at least 5 characters")
         )
