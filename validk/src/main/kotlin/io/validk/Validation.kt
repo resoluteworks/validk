@@ -67,6 +67,12 @@ class Validation<T>(
         }
     }
 
+    fun KProperty1<T, String?>.notNullOrBlank(errorMessage: String) {
+        notNull(errorMessage) {
+            notBlank() message errorMessage
+        }
+    }
+
     infix fun <E, R : Collection<E>> KProperty1<T, R>.each(block: Validation<E>.() -> Unit) {
         addChildValidation(this, block, checksCollectionElements = true)
     }

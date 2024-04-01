@@ -40,6 +40,18 @@ class NullableTest : StringSpec({
         validation.validate(Person("John Smith", "aaa")) shouldBe errors(ValidationError("email", "must be a valid email"))
     }
 
+    "notNullOrBlank" {
+        data class Person(val name: String?)
+
+        val validation = Validation {
+            Person::name.notNullOrBlank("Please enter a name")
+        }
+        validation.validate(Person(null)) shouldBe errors(ValidationError("name", "Please enter a name"))
+        validation.validate(Person("")) shouldBe errors(ValidationError("name", "Please enter a name"))
+        validation.validate(Person("   ")) shouldBe errors(ValidationError("name", "Please enter a name"))
+        validation.validate(Person("   \t \n \t ")) shouldBe errors(ValidationError("name", "Please enter a name"))
+    }
+
     "cannot be null custom message" {
         data class Person(val name: String, val email: String?)
 
