@@ -94,6 +94,17 @@ class Validation<T>(
         dynamicValidations.add(block)
     }
 
+    fun <R> validate(value: T, block: ValidationCheck<T, R>.() -> Unit): R {
+        val builder = ValidationCheck<T, R>()
+        block(builder)
+        val errors = validate(value)
+        return if (errors != null) {
+            builder.success!!(value, errors)
+        } else {
+            builder.error!!(value)
+        }
+    }
+
     fun validate(value: T?): ValidationErrors? {
         if (value == null) {
             // Technically, we would not have a Validation<T> unless:
