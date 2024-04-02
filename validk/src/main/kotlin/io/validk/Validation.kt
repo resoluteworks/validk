@@ -60,7 +60,7 @@ class Validation<T>(
         }
     }
 
-    fun <R> KProperty1<T, R?>.notNull(errorMessage: String, block: Validation<R>.() -> Unit) {
+    fun <R> KProperty1<T, R?>.notNull(errorMessage: String, block: Validation<R>.() -> Unit = {}) {
         val property = this
         addChildValidation<R>(property, {}, nullMessage = errorMessage).apply {
             property.ifNotNull(block)
