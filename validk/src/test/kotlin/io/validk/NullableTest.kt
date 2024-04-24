@@ -52,6 +52,21 @@ class NullableTest : StringSpec({
         validation.validate(Person("   \t \n \t ")) shouldBe ValidationErrors(ValidationError("name", "Please enter a name"))
     }
 
+    "notNullOrBlank block" {
+        data class Person(val name: String?)
+
+        val validation = Validation {
+            Person::name.notNullOrBlank("Please enter a name") {
+                minLength(10) message "Name too short"
+            }
+        }
+        validation.validate(Person(null)) shouldBe ValidationErrors(ValidationError("name", "Please enter a name"))
+        validation.validate(Person("")) shouldBe ValidationErrors(ValidationError("name", "Please enter a name"))
+        validation.validate(Person("   ")) shouldBe ValidationErrors(ValidationError("name", "Please enter a name"))
+        validation.validate(Person("   \t \n \t ")) shouldBe ValidationErrors(ValidationError("name", "Please enter a name"))
+        validation.validate(Person("john")) shouldBe ValidationErrors(ValidationError("name", "Name too short"))
+    }
+
     "cannot be null custom message" {
         data class Person(val name: String, val email: String?)
 

@@ -67,9 +67,10 @@ class Validation<T>(
         }
     }
 
-    fun KProperty1<T, String?>.notNullOrBlank(errorMessage: String) {
+    fun KProperty1<T, String?>.notNullOrBlank(errorMessage: String, block: (Validation<String>.() -> Unit)? = null) {
         notNull(errorMessage) {
             notBlank() message errorMessage
+            block?.let { block(this) }
         }
     }
 
