@@ -22,7 +22,7 @@ data class ValidationErrors(val validationErrors: List<ValidationError>) {
     }
 
     /**
-     * Returns all the first error message for the provided [propertyPath] or null if there are no errors for it.
+     * Returns the first error message for the provided [propertyPath] or null if there are no errors for it.
      */
     fun error(propertyPath: String): String? {
         return errors[propertyPath]?.firstOrNull()
