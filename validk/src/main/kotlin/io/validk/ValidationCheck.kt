@@ -1,14 +1,14 @@
 package io.validk
 
 class ValidationCheck<T, R>(
-    var success: (T.(ValidationErrors) -> R)? = null,
-    var error: (T.() -> R)? = null
+    var error: (T.(ValidationErrors) -> R)? = null,
+    var success: ((T) -> R)? = null
 ) {
     fun error(onError: T.(ValidationErrors) -> R) {
-        this.success = onError
+        this.error = onError
     }
 
-    fun success(onSuccess: T.() -> R) {
-        this.error = onSuccess
+    fun success(onSuccess: (T) -> R) {
+        this.success = onSuccess
     }
 }

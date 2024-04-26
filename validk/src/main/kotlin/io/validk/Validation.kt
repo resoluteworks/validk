@@ -100,9 +100,9 @@ class Validation<T>(
         block(builder)
         val errors = validate(value)
         return if (errors != null) {
-            builder.success!!(value, errors)
+            builder.error!!(value, errors)
         } else {
-            builder.error!!(value)
+            builder.success!!(value)
         }
     }
 

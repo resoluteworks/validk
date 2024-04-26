@@ -18,7 +18,7 @@ class ValidObjectTest : StringSpec({
 
         TestValidObject("", 12).validate {
             error { Result(false, this, it) }
-            success { Result(true, this, null) }
+            success { Result(true, it, null) }
         } shouldBe Result(
             false, TestValidObject("", 12), ValidationErrors(
                 ValidationError("name", "cannot be blank"),
@@ -28,7 +28,7 @@ class ValidObjectTest : StringSpec({
 
         TestValidObject("John smith", 20).validate {
             this.error { Result(false, this, it) }
-            success { Result(true, this, null) }
+            success { Result(true, it, null) }
         } shouldBe Result(true, TestValidObject("John smith", 20), null)
     }
 }) {
