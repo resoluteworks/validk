@@ -14,6 +14,5 @@ dependencies {
     implementation("org.jacoco:org.jacoco.core:0.8.10")
     implementation("org.jetbrains.dokka:dokka-gradle-plugin:1.9.0")
     implementation("com.github.nbaztec:coveralls-jacoco-gradle-plugin:1.2.18")
-    implementation("com.github.nbaztec:coveralls-jacoco-gradle-plugin:1.2.18")
     implementation("org.jetbrains.dokka:dokka-gradle-plugin:1.9.20")
 }
