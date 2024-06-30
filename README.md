@@ -110,6 +110,24 @@ val validation: Validation<Entity> = Validation {
     }
 }
 ```
+## Validation with return type
+You can return a custom validation outcomes by handling the `error` and `success` states
+of a validation call. Below is an example returning  a `Boolean` depending on the
+validation result.
+
+```kotlin
+data class Person(val name: String, val age: Int)
+
+val validation = Validation {
+    Person::name { notBlank() }
+    Person::age { min(18) }
+}
+
+val result: Boolean = validation.validate(Person(name = "John Smith", age = 12)) {
+    error { false }
+    success { true }
+}
+```
 
 ## Fail-fast validation
 It's often required to only return the first failure (failed constraint) message when validating a field.
@@ -146,3 +164,4 @@ data class MyObject(val name: String, val age: Int) : ValidObject<MyObject> {
 
 val result = MyObject("John Smith", 12).validate()
 ```
+

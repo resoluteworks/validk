@@ -103,6 +103,20 @@ class Examples : StringSpec({
         val result = MyObject("John Smith", 12).validate()
     }
 
+
+    "validation check" {
+        data class Person(val name: String, val age: Int)
+
+        val validation = Validation {
+            Person::name { notBlank() }
+            Person::age { min(18) }
+        }
+
+        val result: Boolean = validation.validate(Person(name = "John Smith", age = 12)) {
+            error { false }
+            success { true }
+        }
+    }
 }) {
     private data class Entity(
         val entityType: String,
