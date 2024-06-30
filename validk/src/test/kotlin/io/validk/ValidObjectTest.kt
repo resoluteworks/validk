@@ -17,7 +17,7 @@ class ValidObjectTest : StringSpec({
         data class Result(val success: Boolean, val input: TestValidObject, val errors: ValidationErrors?)
 
         TestValidObject("", 12).validate {
-            error { Result(false, this, it) }
+            error { obj, errors -> Result(false, obj, errors) }
             success { Result(true, it, null) }
         } shouldBe Result(
             false, TestValidObject("", 12), ValidationErrors(
@@ -27,7 +27,7 @@ class ValidObjectTest : StringSpec({
         )
 
         TestValidObject("John smith", 20).validate {
-            this.error { Result(false, this, it) }
+            this.error { obj, errors -> Result(false, obj, errors) }
             success { Result(true, it, null) }
         } shouldBe Result(true, TestValidObject("John smith", 20), null)
     }

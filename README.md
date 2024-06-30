@@ -124,7 +124,7 @@ val validation = Validation {
 }
 
 val result: Boolean = validation.validate(Person(name = "John Smith", age = 12)) {
-    error { false }
+    error { person, errors -> false }
     success { true }
 }
 ```

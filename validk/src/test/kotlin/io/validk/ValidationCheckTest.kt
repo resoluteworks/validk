@@ -17,12 +17,12 @@ class ValidationCheckTest : StringSpec({
         }
 
         validation.validate(Person(name = "John Smith", age = 12)) {
-            error { false }
+            error { person, errors -> false }
             success { true }
         } shouldBe false
 
         validation.validate(Person(name = "John Smith", age = 23)) {
-            error { false }
+            error { person, errors -> false }
             success { true }
         } shouldBe true
     }
