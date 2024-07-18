@@ -111,7 +111,7 @@ val validation: Validation<Entity> = Validation {
 }
 ```
 ## Validation with return type
-You can return a custom validation outcomes by handling the `error` and `success` states
+You can return a custom validation outcome by handling the `error` and `success` states
 of a validation call. Below is an example returning  a `Boolean` depending on the
 validation result.
 
