@@ -18,6 +18,11 @@ kotlin {
     jvmToolchain(21)
 }
 
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
 tasks.dokkaHtml {
     outputDirectory.set(layout.buildDirectory.dir("../../docs/dokka/${project.name}"))
 }
