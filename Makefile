@@ -1,9 +1,10 @@
 export OP_ACCOUNT := my.1password.com
-
-include .env
-export
-
 include gradle.properties
+
+ifneq (,$(wildcard .env))
+	include .env
+	export
+endif
 
 env:
 	rm -f .env
@@ -14,10 +15,10 @@ test:
 	./gradlew coverallsJacoco
 
 publish:
-	./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository
+	./gradlew publishAllPublicationsToCentralPortal
 
 publish-local:
-	./gradlew publish -x initializeSonatypeStagingRepository -x publishMavenJavaPublicationToSonatypeRepository
+	./gradlew publish
 
 release: test publish-local publish
 	@echo $(validkVersion)
