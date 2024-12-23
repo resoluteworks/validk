@@ -1,40 +1,53 @@
 package io.validk
 
-data class ValidationErrors(val validationErrors: List<ValidationError>) {
+/**
+ * Represents the validation errors for a validation failure.
+ *
+ * @property errors The list of validation errors.
+ */
+data class ValidationErrors(val errors: List<ValidationError>) {
 
-    constructor(propertyPath: String, errorMessage: String) : this(listOf(ValidationError(propertyPath, errorMessage)))
+    /**
+     * Creates a new [ValidationErrors] instance with a single error.
+     */
+    constructor(path: String, message: String) : this(listOf(ValidationError(path, message)))
 
+    /**
+     * Convenience vararg constructor
+     */
     constructor(vararg errors: ValidationError) : this(errors.toList())
 
     /**
-     * Error messages grouped by property path
+     * Returns the validation errors as a map where the key is the property path and
+     * the value is a list of error messages for that property.
      */
-    val errors: Map<String, List<String>> =
-        validationErrors.groupBy { it.propertyPath }
+    val errorsByPath: Map<String, List<String>> =
+        errors.groupBy { it.path }
             .map { it.key to it.value.map { error -> error.message } }
             .toMap()
 
     /**
-     * Returns all error messages for the provided [propertyPath] or empty list if there are no errors for it.
+     * Returns all error messages for the provided [path] or an empty list if
+     * there are no errors for it.
      */
-    fun errors(propertyPath: String): List<String> {
-        return errors[propertyPath] ?: emptyList()
-    }
+    fun errors(path: String): List<String> = errorsByPath[path] ?: emptyList()
 
     /**
-     * Returns the first error message for the provided [propertyPath] or null if there are no errors for it.
+     * Returns the first error message for the provided [path] or
+     * null if there are no errors for it.
      */
-    fun error(propertyPath: String): String? {
-        return errors[propertyPath]?.firstOrNull()
-    }
+    fun error(path: String): String? = errorsByPath[path]?.firstOrNull()
 
     /**
-     * Set of property paths containing errors
+     * Set of property paths containing errors.
      */
-    val failedProperties: Set<String> = validationErrors.map { it.propertyPath }.toSet()
+    val failedProperties: Set<String> = errors.map { it.path }.toSet()
 
     /**
-     * Checks if there are validation errors for a property path
+     * Checks if there are validation errors for a property path.
+     *
+     * @param propertyPath The property path to check for errors.
+     * @return `true` if there are errors for the property path, `false` otherwise.
      */
     fun hasErrors(propertyPath: String): Boolean = failedProperties.contains(propertyPath)
 }

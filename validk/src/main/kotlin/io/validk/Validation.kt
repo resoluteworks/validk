@@ -1,39 +1,36 @@
 package io.validk
 
+import io.validk.constraints.Constraint
+import io.validk.constraints.notBlank
 import kotlin.reflect.KProperty1
 
-internal typealias DynamicValidation<T> = Validation<T>.(T) -> Unit
+internal typealias DynamicValidation<Value> = Validation<Value>.(Value) -> Unit
 
-class Validation<T>(
+class Validation<Value>(
     private val propertyPath: String,
     private val validatesCollectionElements: Boolean = false,
     private var failFast: Boolean = true,
     private val nullMessage: String = "is required"
 ) {
-    private val constraints = mutableListOf<Constraint<T>>()
-    private val childValidations = mutableMapOf<KProperty1<T, Any?>, MutableList<Validation<Any>>>()
-    private val dynamicValidations = mutableListOf<DynamicValidation<T>>()
+    private val constraints = mutableListOf<Constraint<Value>>()
+    private val childValidations = mutableMapOf<KProperty1<Value, Any?>, MutableList<Validation<Any?>>>()
+    private val dynamicValidations = mutableListOf<DynamicValidation<Value>>()
 
-    fun failFast(failFast: Boolean = true) {
+    fun failFast(failFast: Boolean) {
         this.failFast = failFast
     }
 
-    fun addConstraint(errorMessage: String, test: (T) -> Boolean): Constraint<T> {
-        val constraint = Constraint(errorMessage, test)
+    fun addConstraint(errorMessage: String, predicate: (Value) -> Boolean): Constraint<Value> {
+        val constraint = Constraint(errorMessage, predicate)
         constraints.add(constraint)
         return constraint
     }
 
-    infix fun <R> Constraint<R>.message(errorMessage: String): Constraint<R> {
-        this.errorMessage = errorMessage
-        return this
-    }
-
-    operator fun <R> KProperty1<T, R>.invoke(init: Validation<R>.() -> Unit) {
+    operator fun <PropertyType> KProperty1<Value, PropertyType>.invoke(init: Validation<PropertyType>.() -> Unit) {
         addChildValidation(this, init)
     }
 
-    fun <R> KProperty1<T, R>.whenIs(value: R, block: Validation<T>.(T) -> Unit) {
+    fun <PropertyType> KProperty1<Value, PropertyType>.whenIs(value: PropertyType, block: Validation<Value>.(Value) -> Unit) {
         val property = this
         dynamicValidations.add {
             if (property.get(it) == value) {
@@ -42,71 +39,53 @@ class Validation<T>(
         }
     }
 
-    fun <E> KProperty1<T, Collection<E>>.whenContains(value: E, block: Validation<T>.(T) -> Unit) {
-        val property = this
-        dynamicValidations.add {
-            if (property.get(it).contains(value)) {
-                block(it)
-            }
-        }
-    }
-
-    infix fun <R> KProperty1<T, R?>.ifNotNull(block: Validation<R>.() -> Unit) {
+    infix fun <PropertyType> KProperty1<Value, PropertyType?>.ifNotNull(block: Validation<PropertyType>.() -> Unit) {
         val property = this
         dynamicValidations.add {
             if (property.get(it) != null) {
-                addChildValidation(property as KProperty1<T, R>, block)
+                addChildValidation(property as KProperty1<Value, PropertyType>, block)
             }
         }
     }
 
-    fun <R> KProperty1<T, R?>.notNull(errorMessage: String, block: Validation<R>.() -> Unit = {}) {
+    fun <PropertyType> KProperty1<Value, PropertyType?>.notNull(errorMessage: String, block: Validation<PropertyType>.() -> Unit = {}) {
         val property = this
-        addChildValidation<R>(property, {}, nullMessage = errorMessage).apply {
+        addChildValidation<PropertyType>(property, {}, nullMessage = errorMessage).apply {
             property.ifNotNull(block)
         }
     }
 
-    fun KProperty1<T, String?>.notNullOrBlank(errorMessage: String, block: (Validation<String>.() -> Unit)? = null) {
+    fun KProperty1<Value, String?>.notNullOrBlank(errorMessage: String, block: (Validation<String>.() -> Unit)? = null) {
         notNull(errorMessage) {
             notBlank() message errorMessage
             block?.let { block(this) }
         }
     }
 
-    infix fun <E, R : Collection<E>> KProperty1<T, R>.each(block: Validation<E>.() -> Unit) {
+    infix fun <ElementType, CollectionType : Collection<ElementType>> KProperty1<Value, CollectionType>.each(
+        block: Validation<ElementType>.() -> Unit
+    ) {
         addChildValidation(this, block, checksCollectionElements = true)
     }
 
-    private fun <E> addChildValidation(
-        property: KProperty1<T, Any?>,
-        init: Validation<E>.() -> Unit,
+    private fun <Type> addChildValidation(
+        property: KProperty1<Value, Any?>,
+        init: Validation<Type>.() -> Unit,
         checksCollectionElements: Boolean = false,
         nullMessage: String = this.nullMessage
-    ): Validation<E> {
-        val validation = Validation<E>(propertyPath.addProperty(property.name), checksCollectionElements, failFast, nullMessage)
+    ): Validation<Type> {
+        val validation = Validation<Type>(propertyPath.appendToPropertyPath(property.name), checksCollectionElements, failFast, nullMessage)
         init(validation)
         childValidations.putIfAbsent(property, mutableListOf())
-        childValidations[property]!!.add(validation as Validation<Any>)
+        childValidations[property]!!.add(validation as Validation<Any?>)
         return validation
     }
 
-    fun withValue(block: Validation<T>.(T) -> Unit) {
+    fun withValue(block: Validation<Value>.(Value) -> Unit) {
         dynamicValidations.add(block)
     }
 
-    fun <R> validate(value: T, block: ValidationCheck<T, R>.() -> Unit): R {
-        val builder = ValidationCheck<T, R>()
-        block(builder)
-        val errors = validate(value)
-        return if (errors != null) {
-            builder.error!!(value, errors)
-        } else {
-            builder.success!!(value)
-        }
-    }
-
-    fun validate(value: T?): ValidationErrors? {
+    fun validate(value: Value): ValidationResult<Value> {
         if (value == null) {
             // Technically, we would not have a Validation<T> unless:
             // A) val pojo: T is non-nullable (and we added validations against it)
@@ -115,7 +94,7 @@ class Validation<T>(
             //
             // In either case, this value should not be null and if it is, then we should fail the validation for it now
             // as none of the nested logic/constraints can be applied anyway
-            return ValidationErrors(propertyPath, nullMessage)
+            return ValidationResult.Failure(value, propertyPath, nullMessage)
         }
 
         val errors = mutableListOf<ValidationError>()
@@ -129,11 +108,11 @@ class Validation<T>(
         }
 
         if (dynamicValidations.isNotEmpty()) {
-            val dynamicValidation = Validation<T>(propertyPath = propertyPath, failFast = failFast)
+            val dynamicValidation = Validation<Value>(propertyPath = propertyPath, failFast = failFast)
             dynamicValidations.forEach { valueValidation ->
                 valueValidation(dynamicValidation, value)
             }
-            dynamicValidation.validate(value)?.let { errors.addAll(it.validationErrors) }
+            dynamicValidation.validate(value).ifFailed { errors.addAll(it.errors) }
         }
 
         childValidations.forEach { (property, validations) ->
@@ -141,33 +120,31 @@ class Validation<T>(
             validations.forEach { validation ->
                 if (validation.validatesCollectionElements) {
                     (propertyValue as Collection<*>).forEachIndexed { index, element ->
-                        validation.validate(element!!)?.let { errors.addAll(it.validationErrors.map { it.indexed(property.name, index) }) }
+                        validation.validate(element!!).ifFailed { errors.addAll(it.errors.map { it.indexed(property.name, index) }) }
                     }
                 } else {
-                    validation.validate(propertyValue)?.let { errors.addAll(it.validationErrors) }
+                    validation.validate(propertyValue).ifFailed { errors.addAll(it.errors) }
                 }
             }
         }
 
-        return if (errors.isNotEmpty()) {
-            ValidationErrors(errors)
+        return if (errors.isEmpty()) {
+            ValidationResult.Success(value)
         } else {
-            null
+            ValidationResult.Failure(value, errors)
         }
     }
 
     companion object {
-        operator fun <T> invoke(init: Validation<T>.() -> Unit): Validation<T> {
-            val validation = Validation<T>(propertyPath = "")
+        operator fun <Value> invoke(propertyPath: String = "", init: Validation<Value>.() -> Unit): Validation<Value> {
+            val validation = Validation<Value>(propertyPath = propertyPath)
             return validation.apply(init)
         }
     }
 }
 
-private fun String.addProperty(property: String): String {
-    return if (this.isBlank()) {
-        property
-    } else {
-        "${this}.${property}"
-    }
+private fun String.appendToPropertyPath(property: String): String = if (this.isBlank()) {
+    property
+} else {
+    "${this}.${property}"
 }

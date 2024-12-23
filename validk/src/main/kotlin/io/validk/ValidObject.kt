@@ -3,15 +3,9 @@
 package io.validk
 
 @Suppress("UNCHECKED_CAST")
-interface ValidObject<T> {
+interface ValidObject<Value> {
 
-    val validation: Validation<T>
+    val validation: Validation<Value>
 
-    fun validate(): ValidationErrors? {
-        return validation.validate(this as T)
-    }
-
-    fun <R> validate(block: ValidationCheck<T, R>.() -> Unit): R {
-        return validation.validate(this as T, block)
-    }
+    fun validate(): ValidationResult<Value> = validation.validate(this as Value) as ValidationResult<Value>
 }

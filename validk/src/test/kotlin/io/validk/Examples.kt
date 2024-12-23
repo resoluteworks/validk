@@ -1,17 +1,27 @@
 package io.validk
 
 import io.kotest.core.spec.style.StringSpec
+import io.validk.constraints.email
+import io.validk.constraints.gte
+import io.validk.constraints.minLength
+import io.validk.constraints.notBlank
 
 class Examples : StringSpec({
 
-    "basic" {
+    "Quick start" {
         data class Employee(val name: String, val email: String?)
         data class Organisation(val name: String, val employees: List<Employee>)
 
-        val validation = Validation {
+        val organisationValidation = Validation {
+            // Organisation name should be at least 5 characters long
             Organisation::name { minLength(5) }
+
             Organisation::employees each {
+                // Each employee should have a name that is at least 10 characters long.
                 Employee::name { minLength(10) }
+
+                // An employee can have an email address, but it's not required.
+                // When present, it should be a valid email.
                 Employee::email ifNotNull { email() }
             }
         }
@@ -20,56 +30,60 @@ class Examples : StringSpec({
             name = "ACME",
             employees = listOf(Employee("John", "john@test.com"), Employee("Hannah Johnson", "hanna"))
         )
-        val errors = validation.validate(org)
-        errors?.validationErrors?.forEach { println(it) }
-
-
-        errors!!
-        // Checking validation errors
-
-        // A list of ValidationError objects
-        errors.validationErrors
-
-        // All validation errors for property path employees[0].name (List<String>)
-        errors.errors("employees[0].name")
-
-        // The first error for property path employees[0].name (String)
-        errors.error("employees[0].name")
-
-        // Check whether a property path has any validation errors (Boolean)
-        errors.hasErrors("employees[0].name")
-
-        // List of all property paths that have validation errors (Set<String>)
-        errors.failedProperties
+        val result: ValidationResult<Organisation> = organisationValidation.validate(org)
+        when (result) {
+            is ValidationResult.Success -> println("Validation success")
+            is ValidationResult.Failure -> result.allErrors.forEach { println(it) }
+        }
     }
 
-    "valid object" {
-        data class Person(val name: String, val email: String) : ValidObject<Person> {
-            override val validation: Validation<Person> = Validation {
-                Person::name { minLength(10) }
-                Person::email { email() }
+    "Error messages" {
+        data class Employee(val email: String)
+
+        val employeeValidation = Validation {
+            // Dynamic error message
+            Employee::email {
+                email() message { value -> "Invalid email address: $value" }
+            }
+
+            // Static error message
+            Employee::email {
+                email() message "This emails address is invalid"
             }
         }
-
-        val person = Person("John Smith", "john@test.com")
-        val errors = person.validate()
     }
 
-    "custom messages" {
-        data class Person(val name: String)
+    "Custom constraints" {
+        data class Employee(val name: String)
 
+        val employeeValidation = Validation {
+            Employee::name {
+                addConstraint("Must start with uppercase letter") {
+                    it.first().isUpperCase() == true
+                }
+            }
+        }
+    }
+
+    "Dynamic validation - withValue" {
+        data class Entity(
+            val type: String,
+            val registeredOffice: String,
+            val proofOfId: String
+        )
+
+        Validation<Entity> {
+            withValue { entity ->
+                when (entity.type) {
+                    "PERSON" -> Entity::proofOfId { minLength(10) }
+                    "COMPANY" -> Entity::registeredOffice { minLength(5) }
+                }
+            }
+        }
+    }
+
+    "Dynamic validation - whenIs" {
         Validation {
-            Person::name {
-                notBlank() message "A person needs a name"
-                matches("[a-zA-Z\\s]+") message "Letters only please"
-            }
-        }
-    }
-
-    "context aware" {
-        val validation: Validation<Entity> = Validation {
-            Entity::entityType { enum<EntityType>() }
-
             Entity::entityType.whenIs("PERSON") {
                 Entity::proofOfId { minLength(10) }
             }
@@ -80,42 +94,35 @@ class Examples : StringSpec({
         }
     }
 
-    "context aware - withValue" {
-        Validation<Entity> {
-            Entity::entityType { enum<EntityType>() }
-            withValue { entity ->
-                when (entity.entityType) {
-                    "PERSON" -> Entity::proofOfId { minLength(10) }
-                    "COMPANY" -> Entity::registeredOffice { minLength(5) }
-                }
-            }
-        }
-    }
-
-    "validation object" {
-        data class MyObject(val name: String, val age: Int) : ValidObject<MyObject> {
-            override val validation: Validation<MyObject> = Validation {
-                MyObject::name { notBlank() }
-                MyObject::age { min(18) }
-            }
-        }
-
-        val result = MyObject("John Smith", 12).validate()
-    }
-
-
-    "validation check" {
+    "Convert validation result" {
         data class Person(val name: String, val age: Int)
+        data class Response(val status: HttpStatus, val model: Person, val errors: ValidationErrors? = null)
 
         val validation = Validation {
             Person::name { notBlank() }
-            Person::age { min(18) }
+            Person::age { gte(18) }
         }
 
-        val result: Boolean = validation.validate(Person(name = "John Smith", age = 12)) {
-            error { person, errors -> false }
-            success { true }
+        val personForm = Person(name = "John Smith", age = 12)
+        val httpResponse = validation.validate(personForm).map {
+            success { person ->
+                Response(HttpStatus.OK, person)
+            }
+            error { person, errors ->
+                Response(HttpStatus.BAD_REQUEST, person, errors)
+            }
         }
+    }
+
+    "Valid object" {
+        data class Person(val name: String, val email: String) : ValidObject<Person> {
+            override val validation: Validation<Person> = Validation {
+                Person::name { minLength(10) }
+                Person::email { email() }
+            }
+        }
+
+        val validationResult = Person("John Smith", "john@test.com").validate()
     }
 }) {
     private data class Entity(
@@ -124,13 +131,15 @@ class Examples : StringSpec({
         val proofOfId: String
     )
 
-    private enum class EntityType { COMPANY, PERSON }
-
     private data class MyObject(val name: String, val age: Int) : ValidObject<MyObject> {
         override val validation: Validation<MyObject> = Validation {
             MyObject::name { notBlank() }
-            MyObject::age { min(18) }
+            MyObject::age { gte(18) }
         }
     }
 
+    enum class HttpStatus {
+        OK,
+        BAD_REQUEST
+    }
 }

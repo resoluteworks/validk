@@ -10,12 +10,12 @@ repositories {
     mavenCentral()
 }
 
-val validkVersion:String by project
+val validkVersion: String by project
 group = "io.resoluteworks"
 version = validkVersion
 
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(21)
 }
 
 tasks.dokkaHtml {
