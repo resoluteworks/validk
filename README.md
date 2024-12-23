@@ -6,7 +6,7 @@
 Validk is a validation framework for Kotlin JVM designed with these goals in mind:
 * Typesafe DSL to defining validation rules
 * No annotations or "magic"
-* Options for value-aware and conditional validation rules (aka dynamic validation)
+* Value-aware and conditional validation rules (aka dynamic validation)
 * Zero dependencies
 
 Documentation:
