@@ -173,7 +173,7 @@ Validation {
 ```
 
 When turning fail-fast off, you can still opt to only select the first error message post-validation, by using
-`ValidationErrors.error(propertyPath)`.  For more details on `ValidationErrors` please check the [ValiationErrors docs](https://resoluteworks.github.io/validk/validk/validk/io.validk/-validation-errors/index.html).
+`ValidationErrors.error(propertyPath)`.  See [ValiationErrors docs](https://resoluteworks.github.io/validk/validk/validk/io.validk/-validation-errors/index.html) for more details.
 
 ## ValidObject
 
