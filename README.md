@@ -78,7 +78,7 @@ Employee::email {
 ```
 
 ## Custom constraints
-You can define custom constraints with by calling `addConstraint` inside a validation block.
+You can define custom constraints by calling `addConstraint` inside a validation block.
 ```kotlin
 Employee::name{
     addConstraint("Must start with uppercase letter") {
