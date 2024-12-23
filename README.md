@@ -8,7 +8,10 @@ Validk is a validation framework for Kotlin JVM designed with these goals in min
 * Value-aware and conditional validation (aka dynamic validation)
 * Zero dependencies
 
-[API Docs](https://resoluteworks.github.io/validk/validk/validk/io.validk/index.html)
+Documentation:
+* [API Docs](https://resoluteworks.github.io/validk/validk/validk/io.validk/index.html)
+* [Built-in constraints](https://resoluteworks.github.io/validk/validk/validk/io.validk.constraints/index.html)
+* [Previous 1.x version](https://github.com/resoluteworks/validk/tree/v1.2.9)
 
 ## Dependency
 
