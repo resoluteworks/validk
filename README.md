@@ -145,10 +145,12 @@ val httpResponse = validation.validate(personForm).map {
 ## Fail-fast validation
 
 It's often required to only return the first failure message (first failed constraint) when validating a property.
-This is sometimes the case when displaying user errors in a UI, and when the order of the constraints
-implies the next one would fail anyway (and thus don't need checking).
+This is the case, for example, when displaying user errors in a UI, and when the order of the constraints
+implies the next ones would fail anyway (and thus don't need checking).
 
-For example `notBlank()` failing means that `email()` will fail, and we want to respond with
+For example, let's say that we have an `email` field that's both required and needs to be a valid email.
+In this case, if a `notBlank()` fails, that means that `email()` will fail as well. In this case, we'd like to
+return only the first error message, which would be
 ```
 "Email is required"
 ```
