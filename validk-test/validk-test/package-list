@@ -1,0 +1,6 @@
+$dokka.format:html-v1
+$dokka.linkExtension:html
+$dokka.location:io.validk.test////PointingToDeclaration/validk-test/io.validk.test/index.html
+$dokka.location:io.validk.test//shouldBeFailure/io.validk.ValidationResult[*]#kotlin.Array[io.validk.ValidationError]/PointingToDeclaration/validk-test/io.validk.test/should-be-failure.html
+$dokka.location:io.validk.test//shouldBeSuccess/io.validk.ValidationResult[*]#/PointingToDeclaration/validk-test/io.validk.test/should-be-success.html
+io.validk.test
