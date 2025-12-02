@@ -2,6 +2,7 @@ package io.validk.test
 
 import io.kotest.assertions.withClue
 import io.kotest.inspectors.shouldForAll
+import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.validk.ValidationErrors
 
@@ -20,5 +21,17 @@ fun ValidationErrors.shouldHaveError(path: String, message: String? = null) {
 fun ValidationErrors.shouldHaveErrors(vararg paths: String) {
     paths.shouldForAll { path ->
         shouldHaveError(path)
+    }
+}
+
+fun ValidationErrors.shouldNotHaveError(path: String) {
+    withClue("Expected not to find error with path '$path' in $this") {
+        this.errors.find { it.path == path } shouldBe null
+    }
+}
+
+fun ValidationErrors.shouldNotHaveErrors(vararg paths: String) {
+    paths.shouldForAll { path ->
+        shouldNotHaveError(path)
     }
 }
