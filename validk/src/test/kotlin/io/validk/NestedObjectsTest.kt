@@ -55,12 +55,12 @@ class NestedObjectsTest : StringSpec({
         validation.validate(Person("", Address("", "ABC"))).shouldBeFailure(
             ValidationError("name", "Cannot be blank"),
             ValidationError("address.city", "Cannot be blank"),
-            ValidationError("address.postCode", "Must be at least 4 characters long")
+            ValidationError("address.postCode", "Must be at least 4 characters")
         )
 
         validation.validate(Person("John Smith", Address("", "ABC"))).shouldBeFailure(
             ValidationError("address.city", "Cannot be blank"),
-            ValidationError("address.postCode", "Must be at least 4 characters long")
+            ValidationError("address.postCode", "Must be at least 4 characters")
         )
 
         validation.validate(Person("John Smith", Address("London", "ABCD"))).shouldBeSuccess()
@@ -120,7 +120,7 @@ class NestedObjectsTest : StringSpec({
             )
         ).shouldBeFailure(
             ValidationError("employees[1].roles[0].types", "Cannot be empty"),
-            ValidationError("employees[1].address.postCode", "Must be at least 5 characters long")
+            ValidationError("employees[1].address.postCode", "Must be at least 5 characters")
         )
     }
 })

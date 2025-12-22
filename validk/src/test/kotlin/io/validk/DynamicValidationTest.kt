@@ -29,7 +29,7 @@ class DynamicValidationTest : StringSpec({
             ValidationError("age", "Must be at least 18")
         )
         validation.validate(Entity("COMPANY", "", "", 12)).shouldBeFailure(
-            ValidationError("registeredOffice", "Must be at least 5 characters long")
+            ValidationError("registeredOffice", "Must be at least 5 characters")
         )
 
         validation.validate(Entity("PERSON", "", "Passport number 0123456789", 24)).shouldBeSuccess()
@@ -58,7 +58,7 @@ class DynamicValidationTest : StringSpec({
             ValidationError("age", "Must be at least 18")
         )
         validation.validate(Entity("COMPANY", "", "", 12)).shouldBeFailure(
-            ValidationError("registeredOffice", "Must be at least 5 characters long")
+            ValidationError("registeredOffice", "Must be at least 5 characters")
         )
 
         validation.validate(Entity("PERSON", "", "Passport number 0123456789", 24)).shouldBeSuccess()

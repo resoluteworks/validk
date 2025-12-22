@@ -39,23 +39,23 @@ class StringConstraintsTest : StringSpec({
     "minLength" {
         Validation { minLength(5) }.validate("abcde").shouldBeSuccess()
         Validation("name") { minLength(5) }.validate("abcd").shouldBeFailure(
-            ValidationError("name", "Must be at least 5 characters long")
+            ValidationError("name", "Must be at least 5 characters")
         )
         Validation("lastName") { minLength(5) message { "Too short: ${it.length}" } }.validate("a").shouldBeFailure(
             ValidationError("lastName", "Too short: 1")
         )
         Validation("name") { minLength(5) }.validate(" ").shouldBeFailure(
-            ValidationError("name", "Must be at least 5 characters long")
+            ValidationError("name", "Must be at least 5 characters")
         )
 
         Validation("name") { minLength(5) }.validate("").shouldBeFailure(
-            ValidationError("name", "Must be at least 5 characters long")
+            ValidationError("name", "Must be at least 5 characters")
         )
     }
 
     "maxLength" {
         Validation("name") { maxLength(5) }.validate("abcdef").shouldBeFailure(
-            ValidationError("name", "Must be at most 5 characters long")
+            ValidationError("name", "Must be at most 5 characters")
         )
 
         Validation { maxLength(5) }.validate("abcde").shouldBeSuccess()

@@ -91,7 +91,7 @@ class BasicPropertiesTest : StringSpec({
             Person::name { minLength(5) }
         }.validate(Person(name = "", age = 23)).shouldBeFailure(
             ValidationError("name", "Cannot be blank"),
-            ValidationError("name", "Must be at least 5 characters long")
+            ValidationError("name", "Must be at least 5 characters")
         )
     }
 
