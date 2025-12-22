@@ -12,12 +12,16 @@ fun Validation<String>.notBlank() = addConstraint("Cannot be blank") {
     it.isNotBlank()
 }
 
-fun Validation<String>.minLength(minLength: Int) = addConstraint("Must be at least $minLength characters long") {
+fun Validation<String>.minLength(minLength: Int) = addConstraint("Must be at least $minLength characters") {
     it.length >= minLength
 }
 
-fun Validation<String>.maxLength(maxLength: Int) = addConstraint("Must be at most $maxLength characters long") {
+fun Validation<String>.maxLength(maxLength: Int) = addConstraint("Must be at most $maxLength characters") {
     it.length <= maxLength
+}
+
+fun Validation<String>.maxWords(maxWords: Int) = addConstraint("Must be at most $maxWords words") {
+    it.trim().split("\\s+".toRegex()).size <= maxWords
 }
 
 fun Validation<String>.enum(vararg values: String) = addConstraint("Must be one of: ${values.joinToString(", ")}") {

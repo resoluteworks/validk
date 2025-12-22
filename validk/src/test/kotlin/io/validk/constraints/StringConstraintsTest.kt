@@ -65,6 +65,17 @@ class StringConstraintsTest : StringSpec({
         Validation { maxLength(5) }.validate("").shouldBeSuccess()
     }
 
+    "maxWords" {
+        Validation { maxWords(3) }.validate("one two three").shouldBeSuccess()
+        Validation { maxWords(3) }.validate("one two").shouldBeSuccess()
+        Validation { maxWords(3) }.validate("one").shouldBeSuccess()
+        Validation { maxWords(3) }.validate("").shouldBeSuccess()
+
+        Validation("description") { maxWords(3) }.validate("one two three four").shouldBeFailure(
+            ValidationError("description", "Must be at most 3 words")
+        )
+    }
+
     "enum string" {
         Validation { enum("PERSON", "COMPANY") }.validate("PERSON").shouldBeSuccess()
         Validation("type") { enum("PERSON", "COMPANY") }.validate("OTHER").shouldBeFailure(
