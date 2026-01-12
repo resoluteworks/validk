@@ -17,7 +17,7 @@ Documentation:
 ## Dependency
 
 ```groovy
-implementation "io.resoluteworks:validk:${validkVersion}"
+implementation "works.resolute:validk:${validkVersion}"
 ```
 
 ## Quick start

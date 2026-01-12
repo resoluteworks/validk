@@ -11,7 +11,7 @@ repositories {
 }
 
 val validkVersion: String by project
-group = "io.resoluteworks"
+group = "works.resolute"
 version = validkVersion
 
 kotlin {
