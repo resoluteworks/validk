@@ -1,0 +1,10 @@
+$dokka.format:html-v1
+$dokka.linkExtension:html
+$dokka.location:io.validk.test////PointingToDeclaration/validk-test/io.validk.test/index.html
+$dokka.location:io.validk.test//shouldBeFailure/io.validk.ValidationResult[*]#kotlin.Array[io.validk.ValidationError]/PointingToDeclaration/validk-test/io.validk.test/should-be-failure.html
+$dokka.location:io.validk.test//shouldBeSuccess/io.validk.ValidationResult[*]#/PointingToDeclaration/validk-test/io.validk.test/should-be-success.html
+$dokka.location:io.validk.test//shouldHaveError/io.validk.ValidationErrors#kotlin.String#kotlin.String?/PointingToDeclaration/validk-test/io.validk.test/should-have-error.html
+$dokka.location:io.validk.test//shouldHaveErrors/io.validk.ValidationErrors#kotlin.Array[kotlin.String]/PointingToDeclaration/validk-test/io.validk.test/should-have-errors.html
+$dokka.location:io.validk.test//shouldNotHaveError/io.validk.ValidationErrors#kotlin.String/PointingToDeclaration/validk-test/io.validk.test/should-not-have-error.html
+$dokka.location:io.validk.test//shouldNotHaveErrors/io.validk.ValidationErrors#kotlin.Array[kotlin.String]/PointingToDeclaration/validk-test/io.validk.test/should-not-have-errors.html
+io.validk.test
