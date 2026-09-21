@@ -23,6 +23,14 @@ java {
     withSourcesJar()
 }
 
-tasks.dokkaHtml {
-    outputDirectory.set(layout.buildDirectory.dir("../../docs/dokka/${project.name}"))
+jacoco {
+    // The org.jacoco.core jar on the buildSrc classpath is the single JaCoCo pin; its VERSION carries a
+    // build timestamp (0.8.15.2026...) that the published agent and ant artifacts do not.
+    toolVersion = org.jacoco.core.JaCoCo.VERSION.substringBeforeLast(".")
+}
+
+dokka {
+    dokkaPublications.html {
+        outputDirectory.set(layout.projectDirectory.dir("../docs/dokka/${project.name}"))
+    }
 }
