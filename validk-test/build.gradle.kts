@@ -4,8 +4,10 @@ plugins {
     id("publish-conventions")
 }
 
+description = "Kotest matchers for asserting on validk validation results and errors in tests."
+
 dependencies {
-    val kotestVersion: String by project
+    val kotestVersion = providers.gradleProperty("kotestVersion").get()
 
     implementation(project(":validk"))
 

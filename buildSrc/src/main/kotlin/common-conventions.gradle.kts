@@ -10,7 +10,7 @@ repositories {
     mavenCentral()
 }
 
-val validkVersion: String by project
+val validkVersion = providers.gradleProperty("validkVersion").get()
 group = "works.resolute"
 version = validkVersion
 
