@@ -2,7 +2,7 @@ include gradle.properties
 
 test:
 	./gradlew clean test
-	./gradlew coverallsJacoco
+	COVERALLS_REPO_TOKEN=$$COVERALLS_VALIDK ./gradlew coverallsJacoco
 
 publish:
 	./gradlew publishAggregationToCentralPortal
